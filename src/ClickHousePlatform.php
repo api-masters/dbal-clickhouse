@@ -633,7 +633,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     protected function _getCreateTableSQL($tableName, array $columns, array $options = []) : array
     {
-        $engine        = ! empty($options['engine']) ? $options['engine'] : 'ReplacingMergeTree';
+        $engine        = ! empty($options['engine']) ? $options['engine'] : 'TinyLog';
         $engineOptions = '';
 
         if (isset($options['uniqueConstraints']) && ! empty($options['uniqueConstraints'])) {
