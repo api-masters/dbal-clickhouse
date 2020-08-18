@@ -111,7 +111,8 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function beginTransaction() : void
     {
-        throw DBALException::notSupported(__METHOD__);
+        // do nothing
+        // throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -119,7 +120,8 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function commit() : void
     {
-        throw DBALException::notSupported(__METHOD__);
+        // do nothing
+        // throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -127,7 +129,8 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function rollBack() : void
     {
-        throw DBALException::notSupported(__METHOD__);
+        // do nothing
+        // throw DBALException::notSupported(__METHOD__);
     }
 
     /**
