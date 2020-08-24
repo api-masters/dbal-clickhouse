@@ -32,6 +32,7 @@ use Doctrine\DBAL\Types\SmallIntType;
 use Doctrine\DBAL\Types\StringType;
 use Doctrine\DBAL\Types\TextType;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\Types;
 use FOD\DBALClickHouse\Types\BitNumericalClickHouseType;
 use FOD\DBALClickHouse\Types\DatableClickHouseType;
 use FOD\DBALClickHouse\Types\NumericalClickHouseType;
@@ -830,6 +831,7 @@ class ClickHousePlatform extends AbstractPlatform
             }
 
             $columnArray  = $column->toArray();
+            $columnArray['comment'] = $this->getColumnComment($column);
             $queryParts[] = 'ADD COLUMN ' . $this->getColumnDeclarationSQL($column->getQuotedName($this), $columnArray);
         }
 
@@ -848,6 +850,7 @@ class ClickHousePlatform extends AbstractPlatform
 
             $column      = $columnDiff->column;
             $columnArray = $column->toArray();
+            $columnArray['comment'] = $this->getColumnComment($column);
 
             // Don't propagate default value changes for unsupported column types.
             if (($columnArray['type'] instanceof TextType || $columnArray['type'] instanceof BlobType) &&
@@ -1332,5 +1335,24 @@ class ClickHousePlatform extends AbstractPlatform
         $c = $this->getIdentifierQuoteCharacter();
 
         return $c . addslashes($str) . $c;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isCommentedDoctrineType(Type $doctrineType)
+    {
+        if ($doctrineType->getName() === Types::BOOLEAN) {
+            // We require a commented boolean type in order to distinguish between boolean and smallint
+            // as both (have to) map to the same native type.
+            return true;
+        }
+
+        return parent::isCommentedDoctrineType($doctrineType);
+    }
+
+    public function supportsInlineColumnComments()
+    {
+        return true;
     }
 }

@@ -105,6 +105,14 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
         $fixed   = false;
         $notnull = true;
 
+        $type = $this->_platform->getDoctrineTypeMapping($dbType);
+
+        // In cases where not connected to a database DESCRIBE $table does not return 'Comment'
+        if (isset($tableColumn['comment'])) {
+            $type                   = $this->extractDoctrineTypeFromComment($tableColumn['comment'], $type);
+            $tableColumn['comment'] = $this->removeDoctrineTypeFromComment($tableColumn['comment'], $type);
+        }
+
         if (preg_match('/(Nullable\((\w+)\))/i', $columnType, $matches)) {
             $columnType = str_replace($matches[1], $matches[2], $columnType);
             $notnull    = false;
@@ -118,7 +126,7 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
         }
 
         $unsigned = false;
-        if (stripos($columnType, 'uint') === 0) {
+        if (stripos($columnType, 'uint') === 0 && $type !== 'boolean') {
             $unsigned = true;
         }
 
@@ -140,12 +148,14 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
             'fixed' => $fixed,
             'unsigned' => $unsigned,
             'autoincrement' => false,
-            'comment' => null,
+            'comment'       => isset($tableColumn['comment']) && $tableColumn['comment'] !== ''
+                ? $tableColumn['comment']
+                : null,
         ];
 
         return new Column(
             $tableColumn['name'],
-            Type::getType($this->_platform->getDoctrineTypeMapping($dbType)),
+            Type::getType($type),
             $options
         );
     }
